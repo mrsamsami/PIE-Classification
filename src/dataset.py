@@ -25,11 +25,11 @@ test = df[df.split.eq('test')].drop(['split'], axis = 1)
 
 def unbias(df, type):
     if type == 'max':
-        frac = (len(df[df['label'] == 1]) - len(df[df['label'] == 0])) / len(df[df['label'] == 1])
-        df1 = df[df['label'] == 1].sample(frac = 1 - frac)
-    else:
         n = len(df[df['label'] == 1]) - len(df[df['label'] == 0])
         df1 = df[df['label'] == 1].nlargest(n, 'confidence')
+    else:
+        frac = (len(df[df['label'] == 1]) - len(df[df['label'] == 0])) / len(df[df['label'] == 1])
+        df1 = df[df['label'] == 1].sample(frac = 1 - frac)
 
     df2 = df[df['label'] == 0]
     return pd.concat([df1, df2])
