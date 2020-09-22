@@ -23,16 +23,22 @@ train = df[df.split.eq('training')].drop(['split'], axis = 1)
 dev = df[df.split.eq('development')].drop(['split'], axis = 1)
 test = df[df.split.eq('test')].drop(['split'], axis = 1)
 
-def unbias(df):
-    frac = (len(df[df['label'] == 1]) - len(df[df['label'] == 0])) / len(df[df['label'] == 1])
-    df1 = df[df['label'] == 1].sample(frac = 1 - frac)
+def unbias(df, type):
+    if type == 'max':
+        frac = (len(df[df['label'] == 1]) - len(df[df['label'] == 0])) / len(df[df['label'] == 1])
+        df1 = df[df['label'] == 1].sample(frac = 1 - frac)
+    else:
+        n = len(df[df['label'] == 1]) - len(df[df['label'] == 0])
+        df1 = df[df['label'] == 1].nlargest(n, 'confidence')
+
     df2 = df[df['label'] == 0]
     return pd.concat([df1, df2])
 
 if not biased:
-    train = unbias(train)
-    test = unbias(test)
-    dev = unbias(dev)
+    type = sys.argv[3]
+    train = unbias(train, type)
+    test = unbias(test, type)
+    dev = unbias(dev, type)
 
 train.to_csv('../dataset/processed/train.csv', index = False)
 test.to_csv('../dataset/processed/test.csv', index = False)
